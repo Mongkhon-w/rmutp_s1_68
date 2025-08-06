@@ -15,7 +15,7 @@ model User {
   id          String @id @default(uuid())
   username    String
   password    String
-  phoneNumber String
+  mobile String
   cardId   String
   status   Int
 }
