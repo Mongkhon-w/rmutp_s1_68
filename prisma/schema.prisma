@@ -16,7 +16,7 @@ model User {
   username    String @unique
   password    String
   mobile String @unique @db.VerChar(10)
-  cardId   String @unique @db.VerChar(10)
+  cardId   String @unique @db.VerChar(13)
   status   Boolean
 }
 
