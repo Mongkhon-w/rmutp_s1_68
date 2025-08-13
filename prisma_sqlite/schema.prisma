@@ -1,16 +1,13 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -18,7 +15,10 @@ model User {
   id          String @id @default(uuid())
   username    String @unique
   password    String
-  mobile String @unique @db.VarChar(10)
-  cardId   String @unique @db.VarChar(13)
+  mobile String @unique @db.VerChar(10)
+  cardId   String @unique @db.VerChar(13)
   status   Boolean
 }
+
+
+
