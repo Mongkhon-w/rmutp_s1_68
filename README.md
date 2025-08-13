@@ -14,7 +14,6 @@ npx prisma generate
 npx prisma db push
 npx prisma studio
 ```
-
 ## Develop
 ```bash
 npx prisma generate
