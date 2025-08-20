@@ -1,6 +1,6 @@
 # Prisma
 
-Prawee Wongsa
+Mongkhon Wichaiphap
 
 ## Running
 ### Database
