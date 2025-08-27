@@ -10,6 +10,6 @@
     "typescript": "^5.9.2"
   },
   "scripts": {
-    "build": "tsc app/server.ts --outDir dist"
+    "build": "tsc"
   }
 }

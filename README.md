@@ -47,4 +47,5 @@ npx prisma generate
 ## Develop
 ```
 npm run build
+npm run dev
 ```
