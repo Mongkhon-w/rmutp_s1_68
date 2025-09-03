@@ -29,6 +29,12 @@ app.post("/profile", async (c) => {
     body.password = passwordHash;
     console.log('body.password(replace) ', body);
 
+    c.status(503);
+    return c.json({
+        message: "server Unique constraint failed on the fields: (`username`) ",
+        data: "server error"
+    });
+
     //save to db
     body.status = false;
     const result =  await prisma.profile.create({
