@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client";
 // import { PrismaClient } from "../generated/prisma/client";
+import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -19,8 +20,13 @@ app.get("/profile", async(c) => {
 app.post("/profile", async (c) => {
     //logic to create a new profile
     const body = await c.req.json();
-    console.log('input of peofile', body);
+    console.log('input of profile ', body);
+    console.log('body.password(original) ', body.password);
 
+    //encode password
+    const passwordHash = await bcrypt.hash(body.password, 10);
+    console.log('hash.password(after) ', passwordHash);
+    //save to db
     //output reponse
     return c.json({
         message : "create profile completed" 
