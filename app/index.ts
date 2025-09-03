@@ -24,7 +24,7 @@ app.post("/profile", async (c) => {
     console.log('body.password(original) ', body.password);
 
     //encode password
-    const passwordHash = await bcrypt.hash(body.password, 10);
+    const passwordHash = await bcrypt.hash(body.password, 15);
     console.log('hash.password(after) ', passwordHash);
     body.password = passwordHash;
     console.log('body.password(replace) ', body);
