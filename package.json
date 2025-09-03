@@ -11,6 +11,6 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node app/server.ts"
+    "dev": "npm run build && node dist/server.js"
   }
 }
