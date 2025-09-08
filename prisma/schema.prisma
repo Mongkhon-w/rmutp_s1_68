@@ -16,7 +16,7 @@ datasource db {
 
 model Profile {
   id       String  @id @default(uuid())
-  username String  
+  username String  @unique
   password String
   mobile   String  @unique @db.VarChar(10)
   cardId   String  @unique @db.VarChar(13)
