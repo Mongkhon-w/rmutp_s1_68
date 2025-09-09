@@ -17,13 +17,5 @@ Content-Type: application/json
 }
 
 ### Get some profile by id
-GET http://localhost:3000/profile/7f975af6-aa53-40d2-9d3b-d39a52d35b52
+GET http://localhost:3000/profile/3d246718-5423-40ea-a535-cd198bce8d03
 
-### Login
-POST http://localhost:3000/login
-Content-Type: application/json
-
-{
-    "username": "demo1",
-    "password": "1234"
-}
