@@ -1,23 +1,28 @@
 import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client";
-// import { PrismaClient } from "../generated/prisma/client";
 import * as bcrypt from "bcrypt";
 // import { Md5 } from "md5-typescript";
 import { encode, decode } from "./service";
 
+
 const prisma = new PrismaClient();
 
 const app = new Hono();
-app.get("/", (c) => c.text("Hello, World!"));
-app.get("/about", (c) => {
-    return c.json({
-        message: "Mongkhon Wichaiphap"
-    });
-});
-app.get("/profile", async(c) => {
-    //logic
+
+app.get("/", (c) => c.text("Hello World Today!"));
+app.get("/profile", async (c) => {
+    //get data from db
     const profiles = await prisma.profile.findMany();
-    return c.json(profiles);    
+
+    profiles.forEach(data => {
+        delete data.password;
+    });
+
+    //response
+    return c.json({
+        message: "get data completed",
+        data: profiles
+    }, 200);
 });
 app.post("/profile", async (c) => {
     //logic to create a new profile
@@ -83,6 +88,30 @@ app.get("/profile/:id", async (c) => {
         message: "get data completed",
         data: profile
     }, 200);
+});
+app.post("/login", async (c) => {
+    const body = await c.req.json();
+    console.log('input of login ', body);
+
+    // process ?
+    // 1. find user by username
+    const user = await prisma.profile.findUnique({
+        select: { password: true },
+        where: {
+            username: body.username
+        }
+    });
+    console.log('user info ', user);
+    // 2. compare password
+    const userPassword = await bcrypt.hash(user?.password ?? '', 13);
+    const isMatch = await bcrypt.compare(body.password, user?.password ?? '');
+    console.log('isMatch ', isMatch);
+    return c.json({
+        message: "login completed",
+        data: isMatch,
+        user: user?.password,
+        hash: userPassword
+    });
 });
 
 export default app;
