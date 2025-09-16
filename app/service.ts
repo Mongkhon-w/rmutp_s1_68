@@ -1,21 +1,43 @@
+
 import * as crypto from "crypto";
 
-// const algorithm = "aes-256-cbc";
 const algorithm = "aes-256-cbc";
-// const key = crypto.randomBytes(32);
-// const key = `lovemelovedog`;
-const key = `12345678901234567890123456789012`;
-console.log(`key ${key.toString()}`);
-const iv = crypto.randomBytes(16);
-console.log(`iv ${iv.toString()}`);
-const password = `1password1234`;
 
-const encode = crypto.createCipheriv(algorithm, Buffer.from(key), iv);
-const encrypted = encode.update(password, "utf-8", "base64");
-const encryptedStr = encrypted + encode.final("base64");
-console.log(`encode `, encryptedStr);
 
-const decode = crypto.createDecipheriv(algorithm, Buffer.from(key), iv);
-const decrypted = decode.update(encryptedStr, "base64", "utf-8");
-const decryptedStr = decrypted + decode.final("utf-8");
-console.log(`decode `, decryptedStr);
+const SECRET_KEY = process.env.SECRET_KEY || "my-secret-key";
+
+
+const ENCRYPTION_KEY = crypto
+  .createHash("sha256")
+  .update(SECRET_KEY)
+  .digest()
+  .subarray(0, 32);
+
+
+export function encode(text: string): string {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(algorithm, ENCRYPTION_KEY, iv);
+
+  let encrypted = cipher.update(text, "utf8", "base64");
+  encrypted += cipher.final("base64");
+
+  const packed = iv.toString("base64") + ":" + encrypted;
+
+  console.log(`[ENCODE] input: ${text} -> output: ${encrypted}`);
+  return packed;
+}
+
+export function decode(packed: string): string {
+  const [ivB64, cipherB64] = packed.split(":");
+  if (!ivB64 || !cipherB64) {
+    throw new Error("Invalid payload format");
+  }
+
+  const iv = Buffer.from(ivB64, "base64");
+  const decipher = crypto.createDecipheriv(algorithm, ENCRYPTION_KEY, iv);
+
+  let decrypted = decipher.update(cipherB64, "base64", "utf8");
+  decrypted += decipher.final("utf8");
+
+  return decrypted;
+}
