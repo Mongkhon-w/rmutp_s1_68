@@ -4,6 +4,9 @@ const algorithm = "aes-256-cbc";
 const key = crypto.randomBytes(32);
 const iv = crypto.randomBytes(16);
 
+console.log(`key ${key.toString()}`);
+console.log(`iv ${iv.toString()}`);
+
 export const encode = (password) => {
   const encode = crypto.createCipheriv(algorithm, Buffer.from(key), iv);
   const encrypted = encode.update(password, "utf-8", "base64");
