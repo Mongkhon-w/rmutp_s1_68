@@ -31,7 +31,7 @@ app.get("/profile", async (c) => {
 app.post("/profile", async (c) => {
   const body = await c.req.json();
   console.log("input of profile", body);
-  console.log("body.password(original)", body.password);
+  // console.log("body.password(original)", body.password);
 
   // ตรวจซ้ำด้วยการ decode ค่าที่มีอยู่แล้วมาเทียบกับ input
   const existing = await prisma.profile.findMany({

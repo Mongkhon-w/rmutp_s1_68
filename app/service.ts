@@ -23,7 +23,8 @@ export function encode(text: string): string {
 
   const packed = iv.toString("base64") + ":" + encrypted;
 
-  console.log(`[ENCODE] input: ${text} -> output: ${encrypted}`);
+  console.log(`[ENCODE] input: ${text}`);
+  console.log(`[ENCODE] output: ${encrypted}`);
   return packed;
 }
 
