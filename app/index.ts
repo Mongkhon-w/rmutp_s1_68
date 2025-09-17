@@ -1,78 +1,67 @@
-// app/index.ts
 import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
-import { encode, decode } from "./service";
+import { encrypted, decrypted } from "./service";  
 
 const prisma = new PrismaClient();
 const app = new Hono();
 
-app.get("/", (c) => c.text("Hello, World!"));
+app.get("/", (c) => c.text("Hono!"));
 app.get("/about", (c) => {
-    return c.json({
-        message: "Mongkhon Wichaiphap"
-    });
+  return c.json({ message: "Mongkhon Wichaiphap " });
 });
 
-// GET /profile -> decode ก่อนส่งออก
+//GET profiles
 app.get("/profile", async (c) => {
   const profiles = await prisma.profile.findMany();
 
-  const decoded = profiles.map((p) => ({
+  const decodedProfiles = profiles.map((p) => ({
     ...p,
-    mobile: decode(p.mobile),
-    cardId: decode(p.cardId),
+    mobile: decrypted(p.mobile),
+    cardId: decrypted(p.cardId),
   }));
 
-  return c.json(decoded);
+  return c.json(decodedProfiles);
 });
 
-// POST /profile -> encode แล้วบันทึก, ไม่ decode ตอนตอบกลับ
+//CREATE profile
 app.post("/profile", async (c) => {
   const body = await c.req.json();
-  console.log("input of profile", body);
+  // console.log("input of profile", body);
   // console.log("body.password(original)", body.password);
 
-  // ตรวจซ้ำด้วยการ decode ค่าที่มีอยู่แล้วมาเทียบกับ input
-  const existing = await prisma.profile.findMany({
-    select: { id: true, mobile: true, cardId: true },
-  });
-
+  // encode sensitive fields
+  const encMobile = encrypted(body.mobile);
+  const encCardId = encrypted(body.cardId);
+  // ---- ตรวจซ้ำ (ต้อง decode จาก DB มาเช็ค) ----
+  const existingProfiles = await prisma.profile.findMany();
   const duplicatedFields: string[] = [];
-  for (const p of existing) {
-    try {
-      const m = decode(p.mobile);
-      if (m === body.mobile) duplicatedFields.push("mobile");
-    } catch {}
-    try {
-      const cId = decode(p.cardId);
-      if (cId === body.cardId) duplicatedFields.push("cardId");
-    } catch {}
-    if (duplicatedFields.length) break;
+
+  for (const p of existingProfiles) {
+    if (decrypted(p.mobile) === body.mobile) duplicatedFields.push("mobile");
+    if (decrypted(p.cardId) === body.cardId) duplicatedFields.push("cardId");
   }
 
-  if (duplicatedFields.length) {
-    return c.json({ message: `ข้อมูลซ้ำ: ${duplicatedFields.join(", ")}` }, 503);
+  if (duplicatedFields.length > 0) {
+    return c.json(
+      { message: `ข้อมูลซ้ำ: ${duplicatedFields.join(", ")}` },
+      503
+    );
   }
 
-  // เข้ารหัสค่าที่ต้องปกป้อง (log [ENCODE] จะออกตรงนี้)
-  const encMobile = encode(body.mobile);
-  const encCardId = encode(body.cardId);
+  // ---- hash password ----
+  body.password = await bcrypt.hash(body.password, 12); 
 
-  // hash password (ไม่ log hash)
-  body.password = await bcrypt.hash(body.password, 18);
+  // ---- save to db ----
+  body.mobile = encMobile;
+  body.cardId = encCardId;
+  body.status = false;
 
-  // บันทึก
   const result = await prisma.profile.create({
-    data: {
-      ...body,
-      mobile: encMobile,
-      cardId: encCardId,
-      status: false,
-    },
+    data: body,
   });
 
-  // ไม่ decode ตอน POST
+
   c.status(200);
   return c.json({
     message: "create profile completed",

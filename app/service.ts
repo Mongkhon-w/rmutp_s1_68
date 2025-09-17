@@ -1,37 +1,43 @@
-
 import * as crypto from "crypto";
 
 const algorithm = "aes-256-cbc";
 
+if (!process.env.SECRET_KEY) {
+  throw new Error("SECRET_KEY ไม่ถูกกำหนดใน environment variables!");
+}
 
-const SECRET_KEY = process.env.SECRET_KEY || "my-secret-key";
+// แปลง SECRET_KEY เป็น 32 bytes ด้วย SHA-256 hash
+const ENCRYPTION_KEY = crypto.createHash("sha256")
+  .update(process.env.SECRET_KEY || "default_secret")
+  .digest();
 
+// log key ใน base64
+console.log("key:", ENCRYPTION_KEY.toString("base64"));
 
-const ENCRYPTION_KEY = crypto
-  .createHash("sha256")
-  .update(SECRET_KEY)
-  .digest()
-  .subarray(0, 32);
+// สุ่ม IV ตัวอย่าง (จะสุ่มใหม่ทุกครั้ง)
+const iv = crypto.randomBytes(16);
+console.log("iv:", iv.toString("hex"));
 
-
-export function encode(text: string): string {
-  const iv = crypto.randomBytes(16);
+// 📌 ฟังก์ชันเข้ารหัส
+export function encrypted(text: string): string {
+  const iv = crypto.randomBytes(16); // 16 bytes IV
   const cipher = crypto.createCipheriv(algorithm, ENCRYPTION_KEY, iv);
 
   let encrypted = cipher.update(text, "utf8", "base64");
   encrypted += cipher.final("base64");
 
-  const packed = iv.toString("base64") + ":" + encrypted;
-
   console.log(`[ENCODE] input: ${text}`);
   console.log(`[ENCODE] output: ${encrypted}`);
-  return packed;
+
+  // return iv + ciphertext
+  return iv.toString("base64") + ":" + encrypted;
 }
 
-export function decode(packed: string): string {
+// 📌 ฟังก์ชันถอดรหัส
+export function decrypted(packed: string): string {
   const [ivB64, cipherB64] = packed.split(":");
   if (!ivB64 || !cipherB64) {
-    throw new Error("Invalid payload format");
+    throw new Error("Invalid encrypted format");
   }
 
   const iv = Buffer.from(ivB64, "base64");
