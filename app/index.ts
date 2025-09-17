@@ -7,6 +7,13 @@ import { encode, decode } from "./service";
 const prisma = new PrismaClient();
 const app = new Hono();
 
+app.get("/", (c) => c.text("Hello, World!"));
+app.get("/about", (c) => {
+    return c.json({
+        message: "Mongkhon Wichaiphap"
+    });
+});
+
 // GET /profile -> decode ก่อนส่งออก
 app.get("/profile", async (c) => {
   const profiles = await prisma.profile.findMany();
