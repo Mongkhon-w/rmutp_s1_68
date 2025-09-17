@@ -9,6 +9,10 @@ const prisma = new PrismaClient();
 const app = new Hono();
 
 app.get("/", (c) => c.text("Hello World Today!"));
+app.get("/about", (c) => {
+  return c.json({ 
+    message: "Mongkhon Wichaiphap"});
+});
 app.get("/profile", async (c) => {
     //get data from db
     const profiles = await prisma.profile.findMany();
@@ -84,6 +88,8 @@ app.get("/profile/:id", async (c) => {
     delete profile.password;
     console.log(`cardId`, profile.cardId.length);
     console.log(`mobile`, profile.mobile.length);
+
+    // Decode ออกมาเป็นค่าจริง
     profile.mobile = decode(profile.mobile);
     profile.cardId = decode(profile.cardId);
     // profile.cardId = ;
